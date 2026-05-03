@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+*.egg-info/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual env
+venv/
+
+# Nuitka / build outputs
+build/
+dist/
+*.build/
+build_output.*
+result/build_output.*
+
+# Qt/webview packaged app artifacts
+app.app/
+*.dmg
+*.exe
+*.zip
+
+# Local runtime
+*.mp3
+
+# macOS metadata
+.DS_Store

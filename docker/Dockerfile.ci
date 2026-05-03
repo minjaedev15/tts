@@ -1,0 +1,24 @@
+ARG PYTHON_VERSION=3.12
+FROM python:${PYTHON_VERSION}-slim
+
+WORKDIR /app
+
+# System deps (kept minimal; numpy/others should use wheels when possible)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    zip \
+  && rm -rf /var/lib/apt/lists/*
+# Install deps
+RUN python -m pip install --upgrade pip
+COPY requirements.txt /app/requirements.txt
+RUN pip install -r requirements.txt
+
+# Copy app (compose will mount repo, but copying keeps image usable too)
+COPY app.py /app/app.py
+COPY core.py /app/core.py
+
+# Default env for CI safety (can be overridden by compose)
+ENV TTS_DISABLE_TTS=1
+ENV TTS_DISABLE_AUDIO=1
+ENV TTS_DISABLE_CLEANUP=0
+ENV PYTHONUNBUFFERED=1

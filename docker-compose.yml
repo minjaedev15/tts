@@ -1,0 +1,19 @@
+services:
+  tts-ci:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ci
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.12}
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      TTS_DISABLE_TTS: "1"
+      TTS_DISABLE_AUDIO: "1"
+      TTS_DISABLE_CLEANUP: "0"
+      PYTHONUNBUFFERED: "1"
+    # command은 필요 시 docker-compose run ... -- command 형태로 override 가능
+    command: >
+      sh -lc "python -m py_compile app.py core.py &&
+             python -m unittest discover -s tests -p 'test_*.py' -v"
