@@ -1,21 +1,20 @@
 services:
+  - type: db
+    name: tts-db
+    plan: free
+    runtime: postgres
+    ipAllowList: [] # Only allow internal connections
+
   - type: web
     name: tts-server
+    plan: free
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn -c gunicorn.conf.py wsgi:app
     envVars:
-      - key: DB_HOST
-        sync: false
-      - key: DB_USER
-        sync: false
-      - key: DB_PASSWORD
-        sync: false
-      - key: DB_NAME
-        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tts-db
+          property: connectionString
       - key: PYTHON_VERSION
         value: 3.9.0
-    disk:
-      name: audio-storage
-      mountPath: /app/static/audio
-      sizeGB: 1

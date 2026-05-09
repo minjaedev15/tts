@@ -2,11 +2,11 @@ services:
   tts-server:
     build: .
     ports:
-      - "80:80"
+      - "80:8080"
     environment:
       - DB_HOST=db
-      - DB_USER=root
-      - DB_PASSWORD=root_password
+      - DB_USER=postgres
+      - DB_PASSWORD=password
       - DB_NAME=tts_db
     volumes:
       - ./static/audio:/app/static/audio
@@ -16,20 +16,19 @@ services:
     restart: always
 
   db:
-    image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
+    image: postgres:15
     environment:
-      - MYSQL_ROOT_PASSWORD=root_password
-      - MYSQL_DATABASE=tts_db
-      - MYSQL_USER=tts_user
-      - MYSQL_PASSWORD=tts_password
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=tts_db
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: always
 
 volumes:
-  mysql_data:
+  postgres_data:
