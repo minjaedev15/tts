@@ -1,19 +1,35 @@
 services:
-  tts-ci:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.ci
-      args:
-        PYTHON_VERSION: ${PYTHON_VERSION:-3.12}
-    working_dir: /app
-    volumes:
-      - ./:/app
+  tts-server:
+    build: .
+    ports:
+      - "80:80"
     environment:
-      TTS_DISABLE_TTS: "1"
-      TTS_DISABLE_AUDIO: "1"
-      TTS_DISABLE_CLEANUP: "0"
-      PYTHONUNBUFFERED: "1"
-    # command은 필요 시 docker-compose run ... -- command 형태로 override 가능
-    command: >
-      sh -lc "python -m py_compile app.py core.py &&
-             python -m unittest discover -s tests -p 'test_*.py' -v"
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root_password
+      - DB_NAME=tts_db
+    volumes:
+      - ./static/audio:/app/static/audio
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=tts_db
+      - MYSQL_USER=tts_user
+      - MYSQL_PASSWORD=tts_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    restart: always
+
+volumes:
+  mysql_data:
